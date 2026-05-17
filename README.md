@@ -83,7 +83,3 @@ DocMind/
 └── venv/           # Environnement virtuel (non commité)
 ```
 
-## Auteur
-
-**Steeve Junior Kouakam**  
-[GitHub](https://github.com/stevkouakam) · [Portfolio](https://portfolio-junix-gcyk.vercel.app) · [LinkedIn](https://linkedin.com/in/steeve-junix-kouakam-044659284)
