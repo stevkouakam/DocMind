@@ -63,12 +63,11 @@ def index_document(uploaded_file):
 def query(question: str) -> str:
     """
     Reçoit une question, cherche les chunks pertinents
-    et retourne la réponse générée par Gemini.
+    et retourne la réponse générée par le LLM.
     """
     global index
 
     if index is None:
-        # Si aucun doc n'a été indexé dans cette session, charger depuis ChromaDB
         storage_context = StorageContext.from_defaults(vector_store=vector_store)
         index = VectorStoreIndex.from_vector_store(vector_store, storage_context=storage_context)
 

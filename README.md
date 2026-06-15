@@ -1,85 +1,125 @@
 # DocMind 🧠
 
-Une application web qui te permet de **discuter avec tes propres documents**. Uploade un PDF ou un fichier texte, pose tes questions en langage naturel, et obtiens des réponses précises extraites directement de ton contenu.
+> Upload a document. Ask anything. Get answers straight from your content.
 
-## Comment ça fonctionne
+DocMind is a RAG (Retrieval-Augmented Generation) application that lets you chat with your own PDF or text files using natural language. It combines semantic search with GPT-4o-mini to return precise, grounded answers — not hallucinations.
+
+---
+
+## How it works
 
 ```
-[Document PDF/TXT]
-      ↓
-  Découpage en chunks (500 tokens)
-      ↓
-  Génération d'embeddings (OpenAI)
-      ↓
-  Stockage dans ChromaDB
-      ↓
-[Question de l'utilisateur]
-      ↓
-  Recherche des 3 chunks les plus pertinents
-      ↓
-  GPT-4o-mini génère une réponse basée sur ces extraits
-      ↓
-[Réponse affichée dans le chat]
+┌─────────────────────────────────────────────────────────┐
+│                    INDEXING PIPELINE                    │
+│                                                         │
+│  PDF / TXT  ──►  Text extraction  ──►  Chunking        │
+│                                        (500 tokens,     │
+│                                         50 overlap)     │
+│                        │                                │
+│                        ▼                                │
+│               OpenAI Embeddings       ChromaDB          │
+│            (text-embedding-3-small) ──► storage/        │
+└─────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────┐
+│                     QUERY PIPELINE                      │
+│                                                         │
+│  User question  ──►  Embed question                     │
+│                            │                            │
+│                            ▼                            │
+│                   Top-3 similar chunks                  │
+│                   retrieved from ChromaDB               │
+│                            │                            │
+│                            ▼                            │
+│                    GPT-4o-mini generates                │
+│                    answer from context                  │
+│                            │                            │
+│                            ▼                            │
+│                     Answer in chat                      │
+└─────────────────────────────────────────────────────────┘
 ```
 
-## Technologies
+ChromaDB persists to disk — documents remain indexed across sessions, no need to re-upload.
 
-| Composant | Technologie |
-|-----------|-------------|
-| Interface | Streamlit |
-| LLM | OpenAI GPT-4o-mini |
-| Embeddings | OpenAI text-embedding-3-small |
-| Vector Store | ChromaDB |
-| Framework RAG | LlamaIndex |
-| Lecture PDF | PyMuPDF |
+---
+
+## Tech stack
+
+| Layer        | Technology                     |
+|--------------|-------------------------------|
+| UI           | Streamlit                     |
+| RAG framework| LlamaIndex                    |
+| LLM          | OpenAI GPT-4o-mini            |
+| Embeddings   | OpenAI text-embedding-3-small |
+| Vector store | ChromaDB (persistent)         |
+| PDF reader   | PyMuPDF                       |
+
+---
 
 ## Installation
 
-**1. Cloner le projet**
+**1. Clone the repository**
 ```bash
 git clone https://github.com/stevkouakam/DocMind.git
 cd DocMind
 ```
 
-**2. Créer un environnement virtuel**
+**2. Create a virtual environment**
 ```bash
 python -m venv venv
-venv\Scripts\activate      # Windows
-source venv/bin/activate   # Mac/Linux
+
+# Windows
+venv\Scripts\activate
+
+# macOS / Linux
+source venv/bin/activate
 ```
 
-**3. Installer les dépendances**
+**3. Install dependencies**
 ```bash
-pip install streamlit llama-index llama-index-llms-openai llama-index-embeddings-openai llama-index-vector-stores-chroma llama-index-readers-file chromadb pymupdf python-dotenv
+pip install streamlit llama-index llama-index-llms-openai llama-index-embeddings-openai \
+            llama-index-vector-stores-chroma llama-index-readers-file \
+            chromadb pymupdf python-dotenv
 ```
 
-**4. Configurer la clé API**
+**4. Add your OpenAI API key**
 
-Crée un fichier `.env` à la racine du projet :
+Create a `.env` file at the project root:
 ```
-OPENAI_API_KEY=ta_cle_openai_ici
+OPENAI_API_KEY=your_openai_key_here
 ```
 
-**5. Lancer l'application**
+**5. Run the app**
 ```bash
 streamlit run app.py
 ```
 
-## Utilisation
+Open `http://localhost:8501` in your browser.
 
-1. Ouvre `http://localhost:8501` dans ton navigateur
-2. Uploade un fichier PDF ou TXT
-3. Pose tes questions dans le chat
+---
 
-## Structure du projet
+## Usage
+
+1. Upload a **PDF** or **TXT** file using the file uploader
+2. Wait for indexing to complete
+3. Type any question about the document in the chat input
+4. DocMind retrieves the 3 most relevant passages and generates a grounded answer
+
+---
+
+## Project structure
 
 ```
 DocMind/
-├── app.py          # Interface Streamlit
-├── rag.py          # Moteur RAG (indexation + recherche)
-├── .env            # Clé API (non commité)
-├── .env.example    # Modèle de configuration
-├── storage/        # Base vectorielle ChromaDB (non commité)
-└── venv/           # Environnement virtuel (non commité)
+├── app.py          # Streamlit interface
+├── rag.py          # Indexing and query engine
+├── .env            # API key (not committed)
+├── .env.example    # Config template
+└── storage/        # ChromaDB vector database (not committed)
 ```
 
+---
+
+## License
+
+MIT
